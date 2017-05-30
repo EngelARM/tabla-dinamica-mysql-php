@@ -1,0 +1,52 @@
+public function tabla_producto($producto){
+        $query="SELECT * FROM sub_productos WHERE productos_id='".$producto."' ORDER BY modelo, velocidad_RPM ASC ";
+        $result = mysqli_query(connectSql(),$query);
+          $Ncolumnas=mysqli_num_fields($result);
+          $Nfilas=mysqli_num_rows($result);
+          if(mysqli_num_rows($result)>0){
+            $campo="";
+            $NombColumna="";
+              while ($row = mysqli_fetch_array($result)){
+                $campo.="<tr>\r\n";
+                for($n=0;$n<$Ncolumnas;$n++){
+                    if($n==0 or $n==1 or $n==$Ncolumnas-2 or $n==$Ncolumnas-1){//excluir columnas
+                        continue;
+                    }
+                  if($row[$n]!="" ){
+                    ${'columna'.$n}=1;
+                  }else if($row[$n]=="" && @!${'columna'.$n}){
+                    ${'columna'.$n}="";            
+                    //continue;
+                  }
+                    $campo.="<td ".$n.">";
+                    $campo.= utf8_encode($row[$n]);
+                    $campo.="</td>\r\n";
+                }
+                $campo.="</tr>\r\n";
+              }
+
+            //obtener nombre de columna
+              for($n=0;$n<$Ncolumnas;$n++){
+                if($n==0 or $n==1 or $n==$Ncolumnas-2 or $n==$Ncolumnas-1){//excluir columnas
+                    continue;
+                }
+                $info_campo = $result->fetch_field_direct($n);
+                if(${'columna'.$n}==1){
+                  $NombColumna.="<th>";
+                  $NombColumna.=ucwords(str_replace('_',' ',$info_campo->name));
+                  $NombColumna.="</th>\r\n";
+
+                  $td="<td ".$n.">";
+                  $campo=str_replace($td,'<td>',$campo);
+                }else{
+                  $td="<td ".$n."></td>";
+                  $campo=str_replace($td,'',$campo);
+                }
+                
+              }
+              $tabla="<table border='1'>\r\n<tr>\r\n".$NombColumna."</tr>\r\n".$campo."</table>";
+          }else{
+            $tabla="<center><b>Sin detalles tecnicos.</b></center>";
+          }
+        return $tabla;
+}
